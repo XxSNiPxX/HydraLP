@@ -1,0 +1,2304 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>OpenClaw — Autonomous CLMM Agent</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            :root {
+                --bg0: #06080c;
+                --bg1: #0c1017;
+                --bg2: #131a24;
+                --bg3: #1a2332;
+                --acc: #3b82f6;
+                --acd: rgba(59, 130, 246, 0.15);
+                --grn: #10b981;
+                --gd: rgba(16, 185, 129, 0.15);
+                --red: #ef4444;
+                --rd: rgba(239, 68, 68, 0.15);
+                --amb: #f59e0b;
+                --ad: rgba(245, 158, 11, 0.15);
+                --pur: #a78bfa;
+                --pd: rgba(167, 139, 250, 0.12);
+                --cyn: #06b6d4;
+                --cd: rgba(6, 182, 212, 0.12);
+                --t0: #f1f5f9;
+                --t1: #94a3b8;
+                --t2: #64748b;
+                --brd: #1e293b;
+                --m: "JetBrains Mono", monospace;
+                --s: "Outfit", sans-serif;
+            }
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                font-family: var(--s);
+                background: var(--bg0);
+                color: var(--t0);
+                font-size: 14px;
+                line-height: 1.6;
+                overflow-x: hidden;
+            }
+            ::selection {
+                background: var(--acc);
+                color: var(--bg0);
+            }
+            ::-webkit-scrollbar {
+                width: 5px;
+            }
+            ::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            ::-webkit-scrollbar-thumb {
+                background: var(--bg3);
+                border-radius: 3px;
+            }
+            .top {
+                height: 52px;
+                background: rgba(12, 16, 23, 0.85);
+                backdrop-filter: blur(16px);
+                border-bottom: 1px solid var(--brd);
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 100;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 20px;
+            }
+            .top-brand {
+                font-size: 15px;
+                font-weight: 700;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .top-brand .ico {
+                width: 26px;
+                height: 26px;
+                background: linear-gradient(135deg, var(--acc), var(--pur));
+                border-radius: 6px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+                font-weight: 800;
+                color: var(--bg0);
+            }
+            .top-brand span {
+                color: var(--acc);
+            }
+            .top-r {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                font-size: 12px;
+            }
+            .dot {
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                display: inline-block;
+                flex-shrink: 0;
+            }
+            .dg {
+                background: var(--grn);
+                box-shadow: 0 0 5px var(--grn);
+            }
+            .dr {
+                background: var(--red);
+            }
+            .da {
+                background: var(--amb);
+                animation: blink 1.4s infinite;
+            }
+            @keyframes blink {
+                50% {
+                    opacity: 0.3;
+                }
+            }
+            .pulse {
+                animation: sp2 2s infinite;
+            }
+            @keyframes sp2 {
+                0%,
+                100% {
+                    box-shadow: 0 0 5px var(--grn);
+                }
+                50% {
+                    box-shadow: 0 0 14px var(--grn);
+                }
+            }
+            .dash {
+                display: flex;
+                padding-top: 52px;
+                min-height: 100vh;
+            }
+            .side {
+                width: 200px;
+                background: var(--bg1);
+                border-right: 1px solid var(--brd);
+                position: fixed;
+                left: 0;
+                top: 52px;
+                bottom: 0;
+                padding: 14px 10px;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                gap: 3px;
+            }
+            .ssec {
+                font-size: 9px;
+                font-weight: 600;
+                color: var(--t2);
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                padding: 14px 10px 5px;
+            }
+            .nl {
+                display: flex;
+                align-items: center;
+                gap: 9px;
+                padding: 9px 10px;
+                color: var(--t1);
+                border-radius: 7px;
+                font-size: 12px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.15s;
+                text-decoration: none;
+            }
+            .nl:hover {
+                background: var(--bg2);
+                color: var(--t0);
+            }
+            .nl.on {
+                background: var(--acd);
+                color: var(--acc);
+            }
+            .ni {
+                width: 16px;
+                text-align: center;
+                font-size: 13px;
+            }
+            .side-foot {
+                margin-top: auto;
+                padding: 12px 10px;
+                border-top: 1px solid var(--brd);
+            }
+            .wdk-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 3px 9px;
+                border-radius: 5px;
+                font-size: 10px;
+                font-weight: 600;
+                background: var(--pd);
+                color: var(--pur);
+                border: 1px solid rgba(167, 139, 250, 0.15);
+            }
+            .main {
+                margin-left: 200px;
+                padding: 20px 28px;
+                flex: 1;
+                min-width: 0;
+            }
+            .pnl {
+                display: none;
+            }
+            .pnl.on {
+                display: block;
+            }
+            .pt {
+                font-size: 24px;
+                font-weight: 700;
+                letter-spacing: -0.02em;
+                margin-bottom: 6px;
+            }
+            .psub {
+                font-size: 12px;
+                color: var(--t2);
+                margin-bottom: 20px;
+            }
+            .card {
+                background: var(--bg1);
+                border: 1px solid var(--brd);
+                border-radius: 10px;
+                padding: 18px;
+                margin-bottom: 16px;
+                transition: border-color 0.2s;
+            }
+            .card:hover {
+                border-color: rgba(59, 130, 246, 0.15);
+            }
+            .ct {
+                font-size: 14px;
+                font-weight: 600;
+                margin-bottom: 10px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .cl {
+                font-size: 10px;
+                font-weight: 600;
+                color: var(--t2);
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                margin-bottom: 3px;
+            }
+            .cv {
+                font-size: 24px;
+                font-weight: 700;
+            }
+            .mets {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+                gap: 14px;
+                margin-bottom: 24px;
+            }
+            .met-card {
+                background: var(--bg1);
+                border: 1px solid var(--brd);
+                border-radius: 10px;
+                padding: 16px 18px;
+                position: relative;
+                overflow: hidden;
+            }
+            .met-card::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background: linear-gradient(
+                    90deg,
+                    transparent,
+                    var(--acc),
+                    transparent
+                );
+                opacity: 0;
+                transition: opacity 0.3s;
+            }
+            .met-card:hover::after {
+                opacity: 1;
+            }
+            .btn {
+                padding: 10px 24px;
+                border: none;
+                border-radius: 7px;
+                font-family: var(--s);
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+                display: inline-flex;
+                align-items: center;
+                gap: 7px;
+            }
+            .bg {
+                background: transparent;
+                color: var(--t1);
+                border: 1px solid var(--brd);
+            }
+            .bg:hover {
+                border-color: var(--acc);
+                color: var(--t0);
+                background: var(--acd);
+            }
+            .bsm {
+                padding: 7px 14px;
+                font-size: 12px;
+            }
+            .tbl {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .tbl th {
+                text-align: left;
+                padding: 8px 12px;
+                border-bottom: 1px solid var(--brd);
+                color: var(--t2);
+                font-weight: 600;
+                font-size: 10px;
+                text-transform: uppercase;
+            }
+            .tbl td {
+                padding: 8px 12px;
+                border-bottom: 1px solid var(--brd);
+                font-size: 12px;
+            }
+            .tbl tr:last-child td {
+                border-bottom: none;
+            }
+            .tbl tr:hover td {
+                background: var(--bg2);
+            }
+            .tag {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                font-size: 11px;
+                padding: 3px 9px;
+                border-radius: 5px;
+                font-weight: 500;
+            }
+            .tg {
+                background: var(--gd);
+                color: var(--grn);
+            }
+            .tr {
+                background: var(--rd);
+                color: var(--red);
+            }
+            .tb {
+                background: var(--acd);
+                color: var(--acc);
+            }
+            .tw {
+                background: var(--ad);
+                color: var(--amb);
+            }
+            .tp {
+                background: var(--pd);
+                color: var(--pur);
+            }
+            .tc {
+                background: var(--cd);
+                color: var(--cyn);
+            }
+            .ti {
+                padding: 12px 12px 12px 18px;
+                margin-bottom: 6px;
+                border-left: 2px solid var(--brd);
+                font-size: 12px;
+                border-radius: 0 6px 6px 0;
+                transition: background 0.15s;
+            }
+            .ti:hover {
+                background: var(--bg2);
+            }
+            .ti.decision {
+                border-left-color: var(--acc);
+            }
+            .ti.error {
+                border-left-color: var(--red);
+            }
+            .ti.success {
+                border-left-color: var(--grn);
+            }
+            .ti.start {
+                border-left-color: var(--amb);
+            }
+            .ti.info {
+                border-left-color: var(--pur);
+            }
+            .tt {
+                font-size: 10px;
+                color: var(--t2);
+                font-family: var(--m);
+                margin-bottom: 3px;
+            }
+            .ta {
+                display: inline-block;
+                font-size: 10px;
+                font-weight: 600;
+                padding: 2px 7px;
+                border-radius: 4px;
+                margin-bottom: 3px;
+            }
+            .ta.add {
+                background: var(--gd);
+                color: var(--grn);
+            }
+            .ta.remove {
+                background: var(--rd);
+                color: var(--red);
+            }
+            .ta.hold {
+                background: var(--ad);
+                color: var(--amb);
+            }
+            .ac {
+                background: var(--bg2);
+                border: 1px solid var(--brd);
+                border-radius: 7px;
+                padding: 12px;
+                margin-bottom: 8px;
+            }
+            .ah {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 4px;
+            }
+            .atp {
+                font-weight: 600;
+                font-size: 12px;
+            }
+            .atm {
+                font-size: 10px;
+                color: var(--t2);
+                font-family: var(--m);
+            }
+            .ars {
+                font-size: 11px;
+                color: var(--t1);
+                margin-top: 3px;
+                line-height: 1.5;
+            }
+            .adr {
+                display: flex;
+                justify-content: space-between;
+                padding: 7px 10px;
+                background: var(--bg0);
+                border-radius: 5px;
+                font-size: 12px;
+                margin-top: 5px;
+            }
+            .adr span:first-child {
+                color: var(--t2);
+            }
+            .bufbar {
+                height: 3px;
+                background: var(--bg3);
+                border-radius: 2px;
+                overflow: hidden;
+                margin-top: 6px;
+            }
+            .buffill {
+                height: 100%;
+                background: var(--acc);
+                transition: width 0.5s;
+                border-radius: 2px;
+            }
+            .drow {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 14px;
+                background: var(--bg2);
+                border-radius: 8px;
+                margin-bottom: 8px;
+                font-size: 13px;
+            }
+            .drow .dot {
+                margin-right: 2px;
+            }
+            .dlbl {
+                font-weight: 500;
+                min-width: 120px;
+            }
+            .dval {
+                color: var(--t1);
+                font-family: var(--m);
+                font-size: 11px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .mono {
+                font-family: var(--m);
+            }
+            .empty {
+                color: var(--t2);
+                text-align: center;
+                padding: 40px 20px;
+                font-size: 13px;
+            }
+            .mt8 {
+                margin-top: 8px;
+            }
+            .inp {
+                width: 100%;
+                padding: 9px 12px;
+                background: var(--bg0);
+                border: 1px solid var(--brd);
+                border-radius: 7px;
+                color: var(--t1);
+                font-family: var(--s);
+                font-size: 13px;
+                cursor: not-allowed;
+                opacity: 0.55;
+            }
+            label {
+                display: block;
+                font-size: 11px;
+                font-weight: 600;
+                color: var(--t2);
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                margin-bottom: 5px;
+            }
+            .fld {
+                margin-bottom: 14px;
+            }
+            .lock-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                font-size: 10px;
+                font-weight: 600;
+                padding: 2px 8px;
+                border-radius: 4px;
+                background: var(--ad);
+                color: var(--amb);
+            }
+            .graph-wrap {
+                background: var(--bg2);
+                border-radius: 8px;
+                padding: 14px;
+                height: 180px;
+                position: relative;
+                overflow: hidden;
+                margin-bottom: 14px;
+            }
+            .graph-wrap canvas {
+                width: 100% !important;
+                height: 100% !important;
+            }
+            .graph-empty {
+                position: absolute;
+                inset: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--t2);
+                font-size: 12px;
+            }
+            .stepper {
+                display: flex;
+                align-items: center;
+                padding: 14px 0;
+                overflow-x: auto;
+            }
+            .snode {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-width: 80px;
+            }
+            .scirc {
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 11px;
+                font-weight: 700;
+                border: 2px solid var(--bg3);
+                background: var(--bg1);
+                color: var(--t2);
+                transition: all 0.3s;
+            }
+            .snode.done .scirc {
+                border-color: var(--grn);
+                background: var(--gd);
+                color: var(--grn);
+            }
+            .snode.active .scirc {
+                border-color: var(--acc);
+                background: var(--acd);
+                color: var(--acc);
+            }
+            .slabel {
+                font-size: 9px;
+                color: var(--t2);
+                margin-top: 5px;
+            }
+            .sline {
+                flex: 1;
+                height: 2px;
+                background: var(--bg3);
+                min-width: 16px;
+            }
+            .sline.done {
+                background: var(--grn);
+            }
+            .sline.active {
+                background: linear-gradient(90deg, var(--grn), var(--acc));
+            }
+            .txl {
+                color: var(--acc);
+                text-decoration: none;
+                font-family: var(--m);
+                font-size: 11px;
+            }
+            .txl:hover {
+                color: var(--t0);
+                text-decoration: underline;
+            }
+            .toast {
+                position: fixed;
+                bottom: 24px;
+                right: 24px;
+                z-index: 300;
+                background: var(--bg2);
+                border: 1px solid var(--brd);
+                border-radius: 8px;
+                padding: 12px 18px;
+                font-size: 12px;
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+                transform: translateY(80px);
+                opacity: 0;
+                transition: all 0.3s;
+                pointer-events: none;
+            }
+            .toast.show {
+                transform: translateY(0);
+                opacity: 1;
+                pointer-events: auto;
+            }
+            .toast.err {
+                border-color: rgba(239, 68, 68, 0.3);
+            }
+            .g2 {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 14px;
+            }
+            .pos-card {
+                background: var(--bg1);
+                border: 1px solid var(--brd);
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 16px;
+            }
+            .pos-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 14px;
+            }
+            .pos-pair {
+                font-size: 16px;
+                font-weight: 700;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .pos-range-bar {
+                height: 6px;
+                background: var(--bg3);
+                border-radius: 3px;
+                position: relative;
+                margin: 12px 0;
+            }
+            .pos-range-fill {
+                position: absolute;
+                height: 100%;
+                background: var(--grn);
+                border-radius: 3px;
+                opacity: 0.6;
+            }
+            .pos-range-cur {
+                position: absolute;
+                width: 3px;
+                height: 14px;
+                top: -4px;
+                background: var(--acc);
+                border-radius: 2px;
+            }
+            .pos-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                margin-top: 14px;
+            }
+            .pos-stat {
+                background: var(--bg2);
+                border-radius: 8px;
+                padding: 10px 12px;
+            }
+            .pos-stat-label {
+                font-size: 10px;
+                color: var(--t2);
+                text-transform: uppercase;
+                font-weight: 600;
+            }
+            .pos-stat-val {
+                font-size: 14px;
+                font-weight: 600;
+                margin-top: 2px;
+            }
+            .modal {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(6, 8, 12, 0.92);
+                backdrop-filter: blur(8px);
+                z-index: 200;
+                align-items: center;
+                justify-content: center;
+            }
+            .modal.on {
+                display: flex;
+            }
+            .mbox {
+                background: var(--bg1);
+                border: 1px solid var(--brd);
+                border-radius: 14px;
+                padding: 28px;
+                width: 90%;
+                max-width: 400px;
+                animation: su 0.3s ease;
+            }
+            @keyframes su {
+                from {
+                    opacity: 0;
+                    transform: translateY(14px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            .mbox h2 {
+                font-size: 20px;
+                font-weight: 700;
+                margin-bottom: 6px;
+            }
+            .mbox p {
+                color: var(--t1);
+                margin-bottom: 18px;
+                font-size: 13px;
+            }
+            .steps {
+                margin: 18px 0;
+            }
+            .step {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px;
+                opacity: 0.25;
+                transition: opacity 0.3s;
+            }
+            .step.a {
+                opacity: 1;
+            }
+            .step.d {
+                opacity: 0.5;
+            }
+            .spin {
+                width: 13px;
+                height: 13px;
+                border: 2px solid var(--brd);
+                border-top-color: var(--acc);
+                border-radius: 50%;
+                animation: sp 0.7s linear infinite;
+                flex-shrink: 0;
+            }
+            @keyframes sp {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+            @media (max-width: 768px) {
+                .side {
+                    display: none;
+                }
+                .main {
+                    margin-left: 0;
+                    padding: 14px;
+                }
+                .g2 {
+                    grid-template-columns: 1fr;
+                }
+                .mets {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+                .pos-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="top">
+            <div class="top-brand">
+                <div class="ico">◇</div>
+                Open<span>Claw</span>
+            </div>
+            <div class="top-r" id="tr">
+                <div style="display: flex; align-items: center; gap: 5px">
+                    <span class="dot dr" id="dBe"></span
+                    ><span style="color: var(--t2); font-size: 11px" id="tBe"
+                        >Backend</span
+                    >
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px">
+                    <span class="dot dr" id="dAg"></span
+                    ><span style="color: var(--t2); font-size: 11px" id="tAg"
+                        >Agent</span
+                    >
+                </div>
+                <span
+                    style="
+                        font-family: var(--m);
+                        font-size: 11px;
+                        color: var(--t2);
+                        cursor: pointer;
+                    "
+                    id="tW"
+                    onclick="copyAddr()"
+                    title="Click to copy"
+                    >—</span
+                ><span
+                    style="font-size: 11px; color: var(--t1); font-weight: 600"
+                    id="tB"
+                    >$0.00</span
+                >
+            </div>
+        </nav>
+        <div class="modal" id="createM">
+            <div class="mbox">
+                <h2>Initializing Agent</h2>
+                <p>Setting up self-custodial WDK wallet...</p>
+                <div class="steps">
+                    <div class="step" id="s1">
+                        <div class="spin"></div>
+                        <span>Creating WDK wallet...</span>
+                    </div>
+                    <div class="step" id="s2">
+                        <div class="spin"></div>
+                        <span>Authenticating with backend...</span>
+                    </div>
+                    <div class="step" id="s3">
+                        <div class="spin"></div>
+                        <span>Connecting data stream...</span>
+                    </div>
+                </div>
+                <button
+                    class="btn"
+                    style="
+                        width: 100%;
+                        display: none;
+                        background: var(--acc);
+                        color: #fff;
+                        padding: 12px;
+                    "
+                    id="cDone"
+                    onclick="closeCreate()"
+                >
+                    Enter Dashboard →
+                </button>
+            </div>
+        </div>
+        <div class="dash">
+            <nav class="side">
+                <div class="ssec">Monitor</div>
+                <a class="nl on" onclick="go('overview', this)"
+                    ><span class="ni">📊</span>Overview</a
+                ><a class="nl" onclick="go('portfolio', this)"
+                    ><span class="ni">💰</span>Portfolio</a
+                ><a class="nl" onclick="go('positions', this)"
+                    ><span class="ni">📍</span>Positions</a
+                ><a class="nl" onclick="go('transactions', this)"
+                    ><span class="ni">🔗</span>Transactions</a
+                >
+                <div class="ssec">Intelligence</div>
+                <a class="nl" onclick="go('brain', this)"
+                    ><span class="ni">🧠</span>Brain</a
+                ><a class="nl" onclick="go('execution', this)"
+                    ><span class="ni">▶️</span>Execution</a
+                ><a class="nl" onclick="go('actions', this)"
+                    ><span class="ni">⚡</span>Actions</a
+                >
+                <div class="ssec">System</div>
+                <a class="nl" onclick="go('diag', this)"
+                    ><span class="ni">🔌</span>Diagnostics</a
+                ><a class="nl" onclick="go('settings', this)"
+                    ><span class="ni">⚙️</span>Settings</a
+                >
+                <div class="side-foot">
+                    <div class="wdk-badge">🔐 WDK Wallet</div>
+                    <div
+                        style="
+                            font-size: 10px;
+                            color: var(--t2);
+                            margin-top: 6px;
+                        "
+                    >
+                        Autonomous mode
+                    </div>
+                </div>
+            </nav>
+            <main class="main">
+                <div class="pnl on" id="overview">
+                    <h1 class="pt">Overview</h1>
+                    <p class="psub">
+                        Autonomous CLMM management · WDK self-custodial
+                    </p>
+                    <div class="mets">
+                        <div class="met-card">
+                            <div class="cl">Portfolio</div>
+                            <div class="cv" id="mP">$0.00</div>
+                        </div>
+                        <div class="met-card">
+                            <div class="cl">Position Value</div>
+                            <div class="cv" id="mPV">$0.00</div>
+                        </div>
+                        <div class="met-card">
+                            <div class="cl">Transactions</div>
+                            <div class="cv" id="mTx">0</div>
+                        </div>
+                        <div class="met-card">
+                            <div class="cl">Decisions</div>
+                            <div class="cv" id="mD">0</div>
+                        </div>
+                        <div class="met-card">
+                            <div class="cl">Deployed</div>
+                            <div class="cv" id="mDe">$0.00</div>
+                        </div>
+                        <div class="met-card">
+                            <div class="cl">Pools</div>
+                            <div class="cv" id="mO">0</div>
+                        </div>
+                    </div>
+                    <div class="g2">
+                        <div class="card">
+                            <div class="ct">
+                                Agent Status
+                                <span class="tag tg" id="tS"
+                                    ><span class="dot dg pulse"></span>
+                                    Autonomous</span
+                                >
+                            </div>
+                            <div
+                                style="
+                                    display: flex;
+                                    gap: 8px;
+                                    flex-wrap: wrap;
+                                    margin-bottom: 8px;
+                                "
+                            >
+                                <span class="tag tb" id="tPr">—</span
+                                ><span class="tag tb" id="tMo">—</span>
+                            </div>
+                            <div style="font-size: 11px; color: var(--t2)">
+                                Buffer: <span id="buT">0/10</span>
+                            </div>
+                            <div class="bufbar">
+                                <div
+                                    class="buffill"
+                                    id="buB"
+                                    style="width: 0%"
+                                ></div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="ct">Recent Activity</div>
+                            <div id="rec"><p class="empty">Waiting...</p></div>
+                        </div>
+                    </div>
+                    <div class="g2">
+                        <div class="card">
+                            <div class="ct">Balance History</div>
+                            <div class="graph-wrap">
+                                <canvas id="balC"></canvas>
+                                <div class="graph-empty" id="balE">
+                                    Collecting data...
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="ct">Decisions Over Time</div>
+                            <div class="graph-wrap">
+                                <canvas id="decC"></canvas>
+                                <div class="graph-empty" id="decE">
+                                    Waiting...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pnl" id="portfolio">
+                    <h1 class="pt">Portfolio</h1>
+                    <p class="psub">WDK-managed wallet holdings</p>
+                    <div class="g2">
+                        <div class="card">
+                            <div class="ct">Holdings</div>
+                            <table class="tbl" id="ptbl">
+                                <thead>
+                                    <tr>
+                                        <th>Token</th>
+                                        <th>Balance</th>
+                                        <th>Price</th>
+                                        <th>USD</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <div class="card">
+                            <div class="ct">Statistics</div>
+                            <div id="stC"></div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="ct">
+                            Wallet
+                            <span class="wdk-badge">WDK Self-Custodial</span>
+                        </div>
+                        <div class="adr">
+                            <span>Address</span
+                            ><span
+                                class="mono"
+                                style="
+                                    max-width: 320px;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
+                                    cursor: pointer;
+                                "
+                                id="sW"
+                                onclick="copyAddr()"
+                                >—</span
+                            >
+                        </div>
+                        <div class="adr mt8">
+                            <span>Agent ID</span><span id="sA">—</span>
+                        </div>
+                        <div class="adr mt8">
+                            <span>SOL Balance</span
+                            ><span class="mono" id="solBal">0</span>
+                        </div>
+                        <div class="adr mt8">
+                            <span>USD Value</span
+                            ><span
+                                style="font-weight: 700; color: var(--acc)"
+                                id="usdBal"
+                                >$0.00</span
+                            >
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="ct">Composition</div>
+                        <div class="graph-wrap">
+                            <canvas id="compC"></canvas>
+                            <div class="graph-empty" id="compE">No tokens</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pnl" id="positions">
+                    <h1 class="pt">Positions</h1>
+                    <p class="psub">
+                        Active CLMM positions — live on-chain data
+                    </p>
+                    <div id="poC"><p class="empty">No positions yet</p></div>
+                </div>
+                <div class="pnl" id="transactions">
+                    <h1 class="pt">Transactions</h1>
+                    <p class="psub">On-chain history</p>
+                    <div class="card">
+                        <table class="tbl" id="txTbl">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Type</th>
+                                    <th>Signature</th>
+                                    <th>Pool</th>
+                                    <th>Amount</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="6" class="empty">
+                                        No transactions
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="pnl" id="brain">
+                    <h1 class="pt">Agent Brain</h1>
+                    <p class="psub">
+                        Live LLM reasoning — decisions and analysis
+                    </p>
+                    <div id="brTL">
+                        <p class="empty">Waiting for decisions...</p>
+                    </div>
+                </div>
+                <div class="pnl" id="execution">
+                    <h1 class="pt">Execution Pipeline</h1>
+                    <p class="psub">Plan steps and signing progress</p>
+                    <div class="card">
+                        <div class="ct">
+                            Current Plan
+                            <span
+                                class="tag"
+                                id="execTag"
+                                style="display: none"
+                            ></span>
+                        </div>
+                        <div id="stepWrap">
+                            <p class="empty">No plan executing</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="ct">Execution Log</div>
+                        <div id="execLog"><p class="empty">No history</p></div>
+                    </div>
+                </div>
+                <div class="pnl" id="actions">
+                    <h1 class="pt">Actions</h1>
+                    <p class="psub">On-chain actions by the agent</p>
+                    <div id="acC"><p class="empty">Waiting...</p></div>
+                </div>
+                <div class="pnl" id="diag">
+                    <h1 class="pt">Diagnostics</h1>
+                    <p class="psub">
+                        Auto-checks every 15s · Last:
+                        <span id="dgT" class="mono">—</span>
+                    </p>
+                    <div id="dgR"></div>
+                </div>
+                <div class="pnl" id="settings">
+                    <h1 class="pt">Settings</h1>
+                    <p class="psub">Configuration via environment variables</p>
+                    <div class="card">
+                        <div class="ct">
+                            LLM <span class="lock-badge">🔒 Read Only</span>
+                        </div>
+                        <div class="fld">
+                            <label>Provider</label
+                            ><input
+                                class="inp"
+                                id="cfgProv"
+                                value="—"
+                                readonly
+                            />
+                        </div>
+                        <div class="fld">
+                            <label>Model</label
+                            ><input
+                                class="inp"
+                                id="cfgModel"
+                                value="—"
+                                readonly
+                            />
+                        </div>
+                        <div class="fld">
+                            <label>API Key</label
+                            ><input
+                                class="inp"
+                                type="password"
+                                id="cfgKey"
+                                value="***"
+                                readonly
+                            />
+                        </div>
+                        <div class="g2">
+                            <div class="fld">
+                                <label>Batch</label
+                                ><input
+                                    class="inp"
+                                    id="cfgBatch"
+                                    value="—"
+                                    readonly
+                                />
+                            </div>
+                            <div class="fld">
+                                <label>Timeout</label
+                                ><input
+                                    class="inp"
+                                    id="cfgTm"
+                                    value="—"
+                                    readonly
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="ct">
+                            Backend <span class="lock-badge">🔒 Read Only</span>
+                        </div>
+                        <div class="fld">
+                            <label>Server</label
+                            ><input
+                                class="inp"
+                                id="cfgSrv"
+                                value="—"
+                                readonly
+                            />
+                        </div>
+                        <div class="fld">
+                            <label>Token Pairs</label
+                            ><textarea
+                                class="inp"
+                                id="cfgPairs"
+                                rows="2"
+                                style="
+                                    resize: vertical;
+                                    font-family: var(--m);
+                                    font-size: 11px;
+                                "
+                                readonly
+                            ></textarea>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="ct">
+                            Wallet <span class="wdk-badge">WDK Protected</span>
+                        </div>
+                        <div class="adr">
+                            <span>Address</span
+                            ><span
+                                class="mono"
+                                id="cfgW"
+                                onclick="copyAddr()"
+                                style="cursor: pointer"
+                                >—</span
+                            >
+                        </div>
+                        <div class="adr mt8">
+                            <span>Export</span
+                            ><span style="color: var(--red); font-weight: 600"
+                                >Disabled</span
+                            >
+                        </div>
+                        <div style="margin-top: 12px">
+                            <button class="btn bg bsm" onclick="restricted()">
+                                Export Keys
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+        <div class="toast" id="toast"></div>
+        <script>
+            const U = location.origin;
+            let ws = null;
+            let S = {
+                wallet: null,
+                agent_id: null,
+                portfolio: { total_value: 0, tokens: [] },
+                balance: { sol: 0, total_usd: 0 },
+                positions: [],
+                statistics: {
+                    positions_opened: 0,
+                    positions_closed: 0,
+                    total_deployed: 0,
+                    total_returned: 0,
+                    tx_count: 0,
+                    volume_usd: 0,
+                },
+                livePositions: null,
+                matchedPools: [],
+                poolsFull: [],
+            };
+            let R = [],
+                A = [],
+                aS = {
+                    running: false,
+                    provider: null,
+                    model: null,
+                    total_decisions: 0,
+                    batch_buffer_size: 0,
+                    batch_target: 10,
+                };
+            let bC = false,
+                bSz = 0,
+                bTg = 10,
+                dg = {},
+                cfg = {},
+                txH = [],
+                exS = {
+                    running: false,
+                    current_step: -1,
+                    total_steps: 0,
+                    log: [],
+                },
+                balH = [],
+                decH = [];
+            const $ = (id) => document.getElementById(id);
+            function ft(t) {
+                if (!t) return "—";
+                try {
+                    return new Date(t).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                    });
+                } catch {
+                    return t;
+                }
+            }
+            function fd(t) {
+                if (!t) return "—";
+                try {
+                    const d = new Date(t);
+                    return (
+                        d.toLocaleDateString([], {
+                            month: "short",
+                            day: "numeric",
+                        }) +
+                        " " +
+                        d.toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                        })
+                    );
+                } catch {
+                    return t;
+                }
+            }
+            function shA(a) {
+                return a ? a.slice(0, 6) + "…" + a.slice(-4) : "—";
+            }
+            function shS(s) {
+                return s ? s.slice(0, 8) + "…" + s.slice(-6) : "—";
+            }
+            function fN(n) {
+                if (n >= 1e6) return (n / 1e6).toFixed(2) + "M";
+                if (n >= 1e3) return (n / 1e3).toFixed(2) + "K";
+                if (n >= 1) return n.toFixed(2);
+                if (n >= 0.01) return n.toFixed(4);
+                return n.toFixed(6);
+            }
+            function toast(m, e) {
+                const t = $("toast");
+                t.textContent = m;
+                t.className = "toast show" + (e ? " err" : "");
+                setTimeout(() => (t.className = "toast"), 3000);
+            }
+            function restricted() {
+                toast("⚠ Restricted — managed server-side", true);
+            }
+            function copyAddr() {
+                if (S.wallet) {
+                    navigator.clipboard.writeText(S.wallet);
+                    toast("Copied");
+                }
+            }
+            function sd(id, ok) {
+                $(id).className = "dot " + (ok ? "dg" : "dr");
+            }
+            async function af(p, m = "GET", b = null) {
+                const o = { method: m, headers: {} };
+                if (b) {
+                    o.headers["Content-Type"] = "application/json";
+                    o.body = JSON.stringify(b);
+                }
+                const r = await fetch(U + p, o);
+                if (!r.ok) {
+                    const e = await r.json().catch(() => ({}));
+                    throw new Error(e.error || r.statusText);
+                }
+                return r.json();
+            }
+            async function boot() {
+                let needs = false;
+                try {
+                    const h = await af("/health");
+                    if (h.agent !== "initialized") needs = true;
+                } catch {
+                    needs = true;
+                }
+                if (needs) {
+                    const m = $("createM");
+                    m.classList.add("on");
+                    try {
+                        $("s1").classList.add("a");
+                        await new Promise((r) => setTimeout(r, 600));
+                        const r = await af("/agent/create", "POST");
+                        $("s1").classList.replace("a", "d");
+                        $("s1").querySelector(".spin").textContent = "✓";
+                        S.agent_id = r.agent_id;
+                        S.wallet = r.wallet;
+                        $("s2").classList.add("a");
+                        await new Promise((r) => setTimeout(r, 500));
+                        $("s2").classList.replace("a", "d");
+                        $("s2").querySelector(".spin").textContent = "✓";
+                        $("s3").classList.add("a");
+                        await new Promise((r) => setTimeout(r, 400));
+                        $("s3").classList.replace("a", "d");
+                        $("s3").querySelector(".spin").textContent = "✓";
+                        await new Promise((r) => setTimeout(r, 300));
+                        $("cDone").style.display = "block";
+                    } catch (e) {
+                        toast(e.message, true);
+                        m.classList.remove("on");
+                    }
+                } else {
+                    try {
+                        S = { ...S, ...(await af("/state")) };
+                    } catch {}
+                    finish();
+                }
+            }
+            function closeCreate() {
+                $("createM").classList.remove("on");
+                finish();
+            }
+            async function finish() {
+                try {
+                    aS = await af("/agent/status");
+                } catch {}
+                try {
+                    cfg = await af("/settings");
+                    rCfg();
+                } catch {}
+                try {
+                    txH = await af("/txlog");
+                } catch {}
+                try {
+                    dg = await af("/diagnostics");
+                } catch {}
+                cWS();
+                ui();
+                setInterval(async () => {
+                    try {
+                        S = { ...S, ...(await af("/state")) };
+                    } catch {}
+                    try {
+                        exS = { ...exS, ...(await af("/execution")) };
+                    } catch {}
+                    ui();
+                }, 8000);
+            }
+            document.addEventListener("DOMContentLoaded", boot);
+            function cWS() {
+                const pr = location.protocol === "https:" ? "wss" : "ws";
+                ws = new WebSocket(pr + "://" + location.host + "/ws");
+                ws.onmessage = (ev) => {
+                    const m = JSON.parse(ev.data);
+                    if (m.type === "state_update") {
+                        S = { ...S, ...m.data };
+                        bC = true;
+                    } else if (m.type === "agent_status") aS = m.data;
+                    else if (m.type === "backend_status") bC = m.data.connected;
+                    else if (m.type === "diagnostics") dg = m.data;
+                    else if (m.type === "config") {
+                        cfg = m.data;
+                        rCfg();
+                    } else if (m.type === "txlog") txH = m.data;
+                    else if (m.type === "reasoning") {
+                        R.unshift(m.data);
+                        if (R.length > 200) R.pop();
+                    } else if (m.type === "decision_history") {
+                        R = m.data.slice().reverse();
+                    } else if (m.type === "decision_made") {
+                        const dm = m.data;
+                        if (dm.steps && dm.steps.length) {
+                            R.unshift({
+                                time: dm.time,
+                                phase: "decision",
+                                message:
+                                    "Plan: " +
+                                    dm.steps.length +
+                                    " step(s) — " +
+                                    dm.steps.map((s) => s.type).join(", "),
+                                action:
+                                    dm.steps[0].type === "increase_position"
+                                        ? "add_liq"
+                                        : "remove_liq",
+                            });
+                        }
+                    } else if (m.type === "action") {
+                        A.unshift(m.data);
+                        if (A.length > 100) A.pop();
+                    } else if (m.type === "agent_started") aS.running = true;
+                    else if (m.type === "agent_stopped") aS.running = false;
+                    else if (m.type === "agent_buffer") {
+                        bSz = m.data.size;
+                        bTg = m.data.target;
+                    } else if (m.type === "tx_logged") txH.push(m.data);
+                    else if (m.type === "step_update") {
+                        exS.running = true;
+                        exS.current_step = m.data.step;
+                        exS.total_steps = m.data.total;
+                        exS.log.push(m.data);
+                    } else if (m.type === "plan_start") {
+                        exS = {
+                            running: true,
+                            current_step: 0,
+                            total_steps: m.data.steps,
+                            log: [],
+                        };
+                    } else if (
+                        m.type === "plan_complete" ||
+                        m.type === "plan_error"
+                    )
+                        exS.running = false;
+                    else if (m.type === "position_opened") {
+                        S.positions = S.positions || [];
+                        S.positions.push(m.data);
+                    }
+                    ui();
+                };
+                ws.onclose = () => {
+                    bC = false;
+                    ui();
+                    setTimeout(cWS, 4000);
+                };
+                ws.onerror = () => {};
+            }
+            function ui() {
+                $("tW").textContent = shA(S.wallet);
+                $("tB").textContent =
+                    "$" + (S.portfolio?.total_value || 0).toFixed(2);
+                sd("dBe", bC);
+                $("tBe").textContent = bC ? "Backend ✓" : "Backend ✗";
+                sd("dAg", aS.running);
+                $("tAg").textContent = aS.running ? "Agent ✓" : "Agent ✗";
+                $("mP").textContent =
+                    "$" + (S.portfolio?.total_value || 0).toFixed(2);
+                const lp = S.livePositions || {};
+                let pv = 0;
+                for (const k in lp) pv += lp[k].total_usd || 0;
+                $("mPV").textContent = "$" + pv.toFixed(2);
+                $("mTx").textContent =
+                    S.statistics?.tx_count || txH.length || 0;
+                $("mD").textContent = aS.total_decisions || R.length || 0;
+                $("mDe").textContent =
+                    "$" + (S.statistics?.total_deployed || 0).toFixed(2);
+                $("mO").textContent = (S.matchedPools || []).length || 0;
+                $("tS").innerHTML = aS.running
+                    ? '<span class="dot dg pulse"></span> Autonomous'
+                    : '<span class="dot da"></span> Starting...';
+                $("tS").className = "tag " + (aS.running ? "tg" : "tw");
+                $("tPr").textContent = aS.provider || cfg.llm_provider || "—";
+                $("tMo").textContent = aS.model || cfg.llm_model || "—";
+                const bp = bTg > 0 ? (bSz / bTg) * 100 : 0;
+                $("buT").textContent = bSz + "/" + bTg;
+                $("buB").style.width = bp + "%";
+                if (S.portfolio?.total_value > 0) {
+                    balH.push({ t: Date.now(), v: S.portfolio.total_value });
+                    if (balH.length > 120) balH.shift();
+                }
+                if (R.length > 0) {
+                    const c = R.length;
+                    const l = decH[decH.length - 1];
+                    if (!l || l.v !== c) {
+                        decH.push({ t: Date.now(), v: c });
+                        if (decH.length > 120) decH.shift();
+                    }
+                }
+                rRe();
+                rPo();
+                rPs();
+                rTx();
+                rBr();
+                rEx();
+                rAc();
+                rDg();
+                drawLine("balC", "balE", balH, "#3b82f6", "PORTFOLIO $");
+                drawLine("decC", "decE", decH, "#10b981", "DECISIONS");
+                drawComp();
+            }
+            function rRe() {
+                const e = $("rec");
+                const items = [...A.slice(0, 3), ...R.slice(0, 4)]
+                    .sort(
+                        (a, b) => new Date(b.time || 0) - new Date(a.time || 0),
+                    )
+                    .slice(0, 5);
+                if (!items.length) {
+                    e.innerHTML = '<p class="empty">Waiting...</p>';
+                    return;
+                }
+                e.innerHTML = items
+                    .map((a) => {
+                        const isAct =
+                            a.type === "ADD_LIQ" || a.type === "REMOVE_LIQ";
+                        const cls = isAct
+                            ? a.type === "ADD_LIQ"
+                                ? "tg"
+                                : "tr"
+                            : "tb";
+                        const lb = isAct ? a.type : a.phase || "info";
+                        return (
+                            '<div style="padding:8px 10px;border-left:2px solid ' +
+                            (isAct ? "var(--grn)" : "var(--acc)") +
+                            ';margin-bottom:6px;border-radius:0 6px 6px 0"><div style="display:flex;justify-content:space-between"><span class="tag ' +
+                            cls +
+                            '" style="font-size:9px">' +
+                            lb +
+                            '</span><span class="atm">' +
+                            ft(a.time) +
+                            '</span></div><div style="font-size:11px;color:var(--t1);margin-top:4px">' +
+                            (a.reasoning || a.message || "").slice(0, 140) +
+                            "</div></div>"
+                        );
+                    })
+                    .join("");
+            }
+            function rPo() {
+                const tb = document.querySelector("#ptbl tbody"),
+                    tk = S.portfolio?.tokens || [];
+                tb.innerHTML = tk.length
+                    ? tk
+                          .map(
+                              (t) =>
+                                  '<tr><td><b style="color:var(--t0)">' +
+                                  (t.symbol || "?") +
+                                  '</b><div style="font-size:10px;color:var(--t2)">' +
+                                  (t.name || "") +
+                                  '</div></td><td class="mono">' +
+                                  fN(parseFloat(t.balance || 0)) +
+                                  '</td><td class="mono" style="color:var(--t2)">' +
+                                  (t.price ? "$" + fN(t.price) : "—") +
+                                  '</td><td style="font-weight:600">$' +
+                                  (t.usd_value || "0.00") +
+                                  "</td></tr>",
+                          )
+                          .join("")
+                    : '<tr><td colspan="4" class="empty">—</td></tr>';
+                const s = S.statistics || {};
+                $("stC").innerHTML = [
+                    ["Opened", s.positions_opened || 0],
+                    ["Closed", s.positions_closed || 0],
+                    ["Deployed", "$" + (s.total_deployed || 0).toFixed(2)],
+                    ["TX Count", s.tx_count || 0],
+                ]
+                    .map(function (r) {
+                        return (
+                            '<div class="adr' +
+                            (r[0] !== "Opened" ? " mt8" : "") +
+                            '"><span>' +
+                            r[0] +
+                            "</span><span>" +
+                            r[1] +
+                            "</span></div>"
+                        );
+                    })
+                    .join("");
+                $("sW").textContent = S.wallet || "—";
+                $("sA").textContent = S.agent_id || "—";
+                $("solBal").textContent =
+                    (S.balance?.sol || 0).toFixed(4) + " SOL";
+                $("usdBal").textContent =
+                    "$" + (S.balance?.total_usd || 0).toFixed(2);
+            }
+            function rPs() {
+                const e = $("poC"),
+                    lp = S.livePositions || {},
+                    pools = S.matchedPools || [],
+                    pf = S.poolsFull || [],
+                    keys = Object.keys(lp);
+                if (!keys.length) {
+                    const ps = S.positions || [];
+                    if (!ps.length) {
+                        e.innerHTML =
+                            '<p class="empty">No positions — agent will open one automatically</p>';
+                        return;
+                    }
+                    e.innerHTML = ps
+                        .map(function (p) {
+                            return (
+                                '<div class="ac"><div class="ah"><span class="mono" style="font-size:11px">' +
+                                (p.pool_id || "").slice(0, 18) +
+                                '…</span><span class="tag tg">active</span></div><div class="adr"><span>Budget</span><span>$' +
+                                p.budget_usd +
+                                '</span></div><div class="adr mt8"><span>Range</span><span>' +
+                                ((p.range_pct || 0) * 100).toFixed(1) +
+                                "%</span></div></div>"
+                            );
+                        })
+                        .join("");
+                    return;
+                }
+                e.innerHTML = keys
+                    .map(function (pid) {
+                        const pd = lp[pid],
+                            pos = pd.positions || [],
+                            pool = pools.find(function (p) {
+                                return (p.id || p.pool_address) === pid;
+                            }),
+                            fp = pf.find(function (p) {
+                                return p.id === pid;
+                            }),
+                            sA =
+                                pool && pool.mintA
+                                    ? pool.mintA.symbol
+                                    : "Token0",
+                            sB =
+                                pool && pool.mintB
+                                    ? pool.mintB.symbol
+                                    : "Token1",
+                            pp = fp ? fp.price : pool ? pool.price : 0,
+                            tvl = pool ? pool.tvl : 0;
+                        return pos
+                            .map(function (p) {
+                                const tL = p.tick_lower_index,
+                                    tH = p.tick_upper_index,
+                                    cT = fp ? fp.current_tick : 0,
+                                    inR = cT >= tL && cT <= tH,
+                                    dA =
+                                        pool && pool.mintA
+                                            ? pool.mintA.decimals
+                                            : 8,
+                                    dB =
+                                        pool && pool.mintB
+                                            ? pool.mintB.decimals
+                                            : 9,
+                                    dd = dB - dA;
+                                const pL = (
+                                        Math.pow(1.0001, tL) * Math.pow(10, dd)
+                                    ).toFixed(2),
+                                    pH = (
+                                        Math.pow(1.0001, tH) * Math.pow(10, dd)
+                                    ).toFixed(2),
+                                    pC =
+                                        pp > 0
+                                            ? pp.toFixed(2)
+                                            : (
+                                                  Math.pow(1.0001, cT) *
+                                                  Math.pow(10, dd)
+                                              ).toFixed(2);
+                                const fr = tH - tL,
+                                    cp =
+                                        fr > 0
+                                            ? Math.max(
+                                                  0,
+                                                  Math.min(
+                                                      100,
+                                                      ((cT - tL) / fr) * 100,
+                                                  ),
+                                              )
+                                            : 50,
+                                    a0 = p.amount0_human || 0,
+                                    a1 = p.amount1_human || 0,
+                                    u0 = p.usd0 || 0,
+                                    u1 = p.usd1 || 0,
+                                    tu = p.position_total_usd || 0;
+                                return (
+                                    '<div class="pos-card"><div class="pos-header"><div class="pos-pair">' +
+                                    sA +
+                                    "/" +
+                                    sB +
+                                    ' <span class="tag ' +
+                                    (inR ? "tg" : "tr") +
+                                    '" style="font-size:10px">' +
+                                    (inR ? "In Range" : "Out of Range") +
+                                    '</span></div><span style="font-size:20px;font-weight:700;color:var(--acc)">$' +
+                                    tu.toFixed(2) +
+                                    '</span></div><div style="font-size:11px;color:var(--t2);margin-bottom:6px">Pool: <span class="mono">' +
+                                    pid.slice(0, 12) +
+                                    '…</span> · Liq: <span class="mono">' +
+                                    p.liquidity +
+                                    '</span></div><div class="pos-range-bar"><div class="pos-range-fill" style="left:0%;width:100%"></div><div class="pos-range-cur" style="left:' +
+                                    cp +
+                                    '%"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t2);margin-bottom:8px"><span>' +
+                                    fN(parseFloat(pL)) +
+                                    " " +
+                                    sB +
+                                    "/" +
+                                    sA +
+                                    '</span><span style="color:var(--acc);font-weight:600">' +
+                                    fN(parseFloat(pC)) +
+                                    "</span><span>" +
+                                    fN(parseFloat(pH)) +
+                                    " " +
+                                    sB +
+                                    "/" +
+                                    sA +
+                                    '</span></div><div class="pos-grid"><div class="pos-stat"><div class="pos-stat-label">' +
+                                    sA +
+                                    '</div><div class="pos-stat-val">' +
+                                    fN(a0) +
+                                    ' <span style="font-size:11px;color:var(--t2)">' +
+                                    (u0 ? "$" + u0.toFixed(2) : "") +
+                                    '</span></div></div><div class="pos-stat"><div class="pos-stat-label">' +
+                                    sB +
+                                    '</div><div class="pos-stat-val">' +
+                                    fN(a1) +
+                                    ' <span style="font-size:11px;color:var(--t2)">' +
+                                    (u1 ? "$" + u1.toFixed(2) : "") +
+                                    '</span></div></div><div class="pos-stat"><div class="pos-stat-label">Pool TVL</div><div class="pos-stat-val">$' +
+                                    fN(tvl) +
+                                    '</div></div><div class="pos-stat"><div class="pos-stat-label">NFT</div><div class="pos-stat-val mono" style="font-size:10px">' +
+                                    (p.nft_mint ? shA(p.nft_mint) : "—") +
+                                    "</div></div></div></div>"
+                                );
+                            })
+                            .join("");
+                    })
+                    .join("");
+            }
+            function rTx() {
+                const tb = document.querySelector("#txTbl tbody");
+                if (!txH.length) {
+                    tb.innerHTML =
+                        '<tr><td colspan="6" class="empty">No transactions</td></tr>';
+                    return;
+                }
+                tb.innerHTML = txH
+                    .slice()
+                    .reverse()
+                    .slice(0, 50)
+                    .map(function (tx) {
+                        const tp = tx.type || "—",
+                            cls =
+                                tp.includes("increase") || tp.includes("add")
+                                    ? "tg"
+                                    : tp.includes("decrease") ||
+                                        tp.includes("remove")
+                                      ? "tr"
+                                      : tp.includes("swap")
+                                        ? "tc"
+                                        : "tb";
+                        return (
+                            '<tr><td class="mono" style="font-size:10px">' +
+                            fd(tx.ts) +
+                            '</td><td><span class="tag ' +
+                            cls +
+                            '">' +
+                            tp +
+                            '</span></td><td><a class="txl" href="' +
+                            tx.solscan +
+                            '" target="_blank">' +
+                            shS(tx.sig) +
+                            '</a></td><td class="mono" style="font-size:10px;color:var(--t2)">' +
+                            (tx.pool && tx.pool !== "unknown"
+                                ? tx.pool.slice(0, 10) + "…"
+                                : "—") +
+                            "</td><td>" +
+                            (tx.amount_usd
+                                ? "$" + tx.amount_usd.toFixed(2)
+                                : "—") +
+                            '</td><td><a href="' +
+                            tx.solscan +
+                            '" target="_blank" style="color:var(--acc);font-size:11px;text-decoration:none">↗</a></td></tr>'
+                        );
+                    })
+                    .join("");
+            }
+            function rBr() {
+                const e = $("brTL");
+                if (!R.length) {
+                    e.innerHTML =
+                        '<p class="empty">Waiting for decisions...</p>';
+                    return;
+                }
+                e.innerHTML = R.slice(0, 40)
+                    .map(function (r) {
+                        const ph = r.phase || "info",
+                            cls =
+                                ph === "decision"
+                                    ? "decision"
+                                    : ph === "error"
+                                      ? "error"
+                                      : ph === "success"
+                                        ? "success"
+                                        : "info";
+                        var at = "";
+                        if (r.action) {
+                            var c =
+                                r.action === "add_liq"
+                                    ? "add"
+                                    : r.action === "remove_liq"
+                                      ? "remove"
+                                      : "hold";
+                            at =
+                                '<span class="ta ' +
+                                c +
+                                '">' +
+                                r.action.replace("_", " ").toUpperCase() +
+                                "</span> ";
+                        }
+                        return (
+                            '<div class="ti ' +
+                            cls +
+                            '"><div class="tt">' +
+                            ft(r.time) +
+                            "</div>" +
+                            at +
+                            '<div style="color:var(--t0);line-height:1.5">' +
+                            (r.message || "") +
+                            "</div>" +
+                            (r.pool_id
+                                ? '<div style="font-size:10px;color:var(--t2);font-family:var(--m);margin-top:3px">' +
+                                  r.pool_id.slice(0, 16) +
+                                  "…</div>"
+                                : "") +
+                            "</div>"
+                        );
+                    })
+                    .join("");
+            }
+            function rEx() {
+                const wrap = $("stepWrap"),
+                    log = $("execLog"),
+                    tag = $("execTag");
+                if (exS.total_steps > 0) {
+                    tag.style.display = "";
+                    tag.className = "tag " + (exS.running ? "tw" : "tg");
+                    tag.innerHTML = exS.running
+                        ? '<span class="dot da"></span> Step ' +
+                          (exS.current_step + 1) +
+                          "/" +
+                          exS.total_steps
+                        : '<span class="dot dg"></span> Complete';
+                    var h = '<div class="stepper">';
+                    for (var i = 0; i < exS.total_steps; i++) {
+                        var st =
+                            i < exS.current_step
+                                ? "done"
+                                : i === exS.current_step
+                                  ? exS.running
+                                      ? "active"
+                                      : "done"
+                                  : "";
+                        if (i > 0)
+                            h +=
+                                '<div class="sline ' +
+                                (i <= exS.current_step ? "done" : "") +
+                                " " +
+                                (i === exS.current_step ? "active" : "") +
+                                '"></div>';
+                        h +=
+                            '<div class="snode ' +
+                            st +
+                            '"><div class="scirc">' +
+                            (i < exS.current_step ? "✓" : i + 1) +
+                            '</div><div class="slabel">Step ' +
+                            (i + 1) +
+                            "</div></div>";
+                    }
+                    h += "</div>";
+                    wrap.innerHTML = h;
+                } else {
+                    tag.style.display = "none";
+                    wrap.innerHTML = '<p class="empty">No plan executing</p>';
+                }
+                if (exS.log && exS.log.length) {
+                    log.innerHTML = exS.log
+                        .slice()
+                        .reverse()
+                        .slice(0, 15)
+                        .map(function (e) {
+                            return (
+                                '<div class="ti ' +
+                                (e.phase === "confirmed"
+                                    ? "success"
+                                    : e.phase === "error"
+                                      ? "error"
+                                      : "start") +
+                                '"><div class="tt">' +
+                                ft(e.ts || new Date().toISOString()) +
+                                '</div><span class="tag ' +
+                                (e.phase === "confirmed"
+                                    ? "tg"
+                                    : e.phase === "error"
+                                      ? "tr"
+                                      : "tw") +
+                                '" style="font-size:9px">' +
+                                e.phase +
+                                '</span><div style="color:var(--t0);margin-top:3px">' +
+                                (e.description || "") +
+                                "</div>" +
+                                (e.sigs
+                                    ? e.sigs
+                                          .map(function (s) {
+                                              return (
+                                                  '<a class="txl" href="https://solscan.io/tx/' +
+                                                  s +
+                                                  '" target="_blank" style="display:block;margin-top:2px">' +
+                                                  shS(s) +
+                                                  " ↗</a>"
+                                              );
+                                          })
+                                          .join("")
+                                    : "") +
+                                "</div>"
+                            );
+                        })
+                        .join("");
+                } else {
+                    log.innerHTML = '<p class="empty">No history</p>';
+                }
+            }
+            function rAc() {
+                const e = $("acC");
+                if (!A.length) {
+                    e.innerHTML = '<p class="empty">Waiting...</p>';
+                    return;
+                }
+                e.innerHTML = A.slice(0, 20)
+                    .map(function (a) {
+                        const cls =
+                            a.type === "ADD_LIQ"
+                                ? "tg"
+                                : a.type === "REMOVE_LIQ"
+                                  ? "tr"
+                                  : "tw";
+                        return (
+                            '<div class="ac"><div class="ah"><span class="tag ' +
+                            cls +
+                            '">' +
+                            (a.type || "—") +
+                            '</span><span class="atm">' +
+                            ft(a.time) +
+                            "</span></div>" +
+                            (a.pool
+                                ? '<div class="adr"><span>Pool</span><span class="mono" style="font-size:10px">' +
+                                  a.pool.slice(0, 16) +
+                                  "…</span></div>"
+                                : "") +
+                            (a.amount
+                                ? '<div class="adr mt8"><span>Budget</span><span>$' +
+                                  a.amount +
+                                  "</span></div>"
+                                : "") +
+                            (a.range_pct != null
+                                ? '<div class="adr mt8"><span>Range</span><span>' +
+                                  (a.range_pct * 100).toFixed(1) +
+                                  "%</span></div>"
+                                : "") +
+                            (a.reasoning
+                                ? '<div class="ars">' + a.reasoning + "</div>"
+                                : "") +
+                            "</div>"
+                        );
+                    })
+                    .join("");
+            }
+            function rDg() {
+                if (!dg.solana_rpc) return;
+                $("dgT").textContent = ft(
+                    dg.solana_rpc && dg.solana_rpc.last_check,
+                );
+                var rows = [
+                    [
+                        "WDK",
+                        dg.wdk && dg.wdk.ok,
+                        dg.wdk && dg.wdk.ok
+                            ? "OK"
+                            : (dg.wdk && dg.wdk.error) || "—",
+                    ],
+                    [
+                        "Wallet",
+                        dg.wallet && dg.wallet.ok,
+                        dg.wallet && dg.wallet.ok
+                            ? shA(dg.wallet.address) +
+                              " · " +
+                              (dg.wallet.sol ? dg.wallet.sol.toFixed(4) : 0) +
+                              " SOL"
+                            : "—",
+                    ],
+                    [
+                        "RPC",
+                        dg.solana_rpc && dg.solana_rpc.ok,
+                        dg.solana_rpc && dg.solana_rpc.ok
+                            ? dg.solana_rpc.latency_ms + "ms"
+                            : "—",
+                    ],
+                    [
+                        "Backend",
+                        dg.backend_http && dg.backend_http.ok,
+                        dg.backend_http && dg.backend_http.ok
+                            ? (dg.backend_http.latency_ms || "?") + "ms"
+                            : "—",
+                    ],
+                    [
+                        "WS",
+                        dg.backend_ws && dg.backend_ws.ok,
+                        dg.backend_ws && dg.backend_ws.ok ? "Connected" : "—",
+                    ],
+                    [
+                        "LLM",
+                        dg.llm_api && dg.llm_api.ok,
+                        dg.llm_api && dg.llm_api.ok ? dg.llm_api.provider : "—",
+                    ],
+                    ["Agent", aS.running, "Autonomous"],
+                ];
+                $("dgR").innerHTML = rows
+                    .map(function (r) {
+                        return (
+                            '<div class="drow"><span class="dot ' +
+                            (r[1] ? "dg" : "dr") +
+                            '"></span><span class="dlbl">' +
+                            r[0] +
+                            '</span><span class="dval">' +
+                            r[2] +
+                            "</span></div>"
+                        );
+                    })
+                    .join("");
+            }
+            function rCfg() {
+                $("cfgProv").value = cfg.llm_provider || "—";
+                $("cfgModel").value = cfg.llm_model || "—";
+                $("cfgKey").value = cfg.llm_api_key || "—";
+                $("cfgBatch").value = cfg.batch_size || "—";
+                $("cfgTm").value = cfg.batch_timeout_s || "—";
+                $("cfgSrv").value = cfg.agent_server || "—";
+                $("cfgPairs").value = cfg.token_pairs
+                    ? cfg.token_pairs
+                          .map(function (p) {
+                              return p.join(",");
+                          })
+                          .join("\n")
+                    : "—";
+                $("cfgW").textContent = S.wallet || "—";
+            }
+            function drawLine(cId, eId, data, color, label) {
+                if (data.length < 2) {
+                    $(eId).style.display = "";
+                    return;
+                }
+                $(eId).style.display = "none";
+                var c = $(cId),
+                    p = c.parentElement,
+                    w = p.clientWidth - 28,
+                    h = p.clientHeight - 28;
+                c.width = w * 2;
+                c.height = h * 2;
+                c.style.width = w + "px";
+                c.style.height = h + "px";
+                var ctx = c.getContext("2d");
+                ctx.scale(2, 2);
+                ctx.clearRect(0, 0, w, h);
+                var vals = data.map(function (d) {
+                        return d.v;
+                    }),
+                    mn = Math.min.apply(null, vals) * 0.97,
+                    mx = Math.max.apply(null, vals) * 1.03,
+                    rng = mx - mn || 1;
+                ctx.strokeStyle = "rgba(148,163,184,.06)";
+                ctx.lineWidth = 1;
+                for (var i = 0; i < 4; i++) {
+                    var y = (h / 4) * i;
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(w, y);
+                    ctx.stroke();
+                }
+                ctx.font = "9px 'JetBrains Mono'";
+                ctx.fillStyle = "rgba(148,163,184,.3)";
+                ctx.fillText(label, 4, 12);
+                ctx.fillText(mx.toFixed(2), 4, 24);
+                ctx.fillText(mn.toFixed(2), 4, h - 4);
+                ctx.beginPath();
+                data.forEach(function (d, i) {
+                    var x = (i / (data.length - 1)) * w,
+                        y2 = h - ((d.v - mn) / rng) * h;
+                    if (i === 0) ctx.moveTo(x, y2);
+                    else ctx.lineTo(x, y2);
+                });
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.lineJoin = "round";
+                ctx.stroke();
+                ctx.lineTo(w, h);
+                ctx.lineTo(0, h);
+                ctx.closePath();
+                ctx.globalAlpha = 0.12;
+                ctx.fillStyle = color;
+                ctx.fill();
+                ctx.globalAlpha = 1;
+                if (data.length) {
+                    var l = data[data.length - 1],
+                        lx = w,
+                        ly = h - ((l.v - mn) / rng) * h;
+                    ctx.beginPath();
+                    ctx.arc(lx, ly, 3, 0, Math.PI * 2);
+                    ctx.fillStyle = color;
+                    ctx.fill();
+                    ctx.font = "bold 10px 'Outfit'";
+                    ctx.fillStyle = color;
+                    ctx.fillText(l.v.toFixed(2), lx - 40, ly - 8);
+                }
+            }
+            function drawComp() {
+                var tk =
+                    S.portfolio && S.portfolio.tokens ? S.portfolio.tokens : [];
+                if (!tk.length) {
+                    $("compE").style.display = "";
+                    return;
+                }
+                $("compE").style.display = "none";
+                var c = $("compC"),
+                    p = c.parentElement,
+                    w = p.clientWidth - 28,
+                    h = p.clientHeight - 28;
+                c.width = w * 2;
+                c.height = h * 2;
+                c.style.width = w + "px";
+                c.style.height = h + "px";
+                var ctx = c.getContext("2d");
+                ctx.scale(2, 2);
+                ctx.clearRect(0, 0, w, h);
+                var total = tk.reduce(function (s, t) {
+                    return s + parseFloat(t.usd_value || 0);
+                }, 0);
+                if (!total) return;
+                var cols = [
+                    "#3b82f6",
+                    "#10b981",
+                    "#f59e0b",
+                    "#a78bfa",
+                    "#ef4444",
+                    "#06b6d4",
+                ];
+                var x = 20,
+                    bH = 40,
+                    bY = (h - bH) / 2 - 10;
+                tk.forEach(function (t, i) {
+                    var pct = parseFloat(t.usd_value || 0) / total,
+                        bw = Math.max(pct * (w - 40), 2);
+                    ctx.fillStyle = cols[i % cols.length];
+                    ctx.beginPath();
+                    ctx.roundRect(
+                        x,
+                        bY,
+                        bw,
+                        bH,
+                        i === 0
+                            ? [6, 0, 0, 6]
+                            : i === tk.length - 1
+                              ? [0, 6, 6, 0]
+                              : [0, 0, 0, 0],
+                    );
+                    ctx.fill();
+                    if (bw > 30) {
+                        ctx.font = "bold 11px 'Outfit'";
+                        ctx.fillStyle = "#fff";
+                        ctx.fillText(t.symbol || "?", x + 8, bY + bH / 2 + 4);
+                    }
+                    ctx.font = "10px 'JetBrains Mono'";
+                    ctx.fillStyle = cols[i % cols.length];
+                    ctx.fillText(
+                        (t.symbol || "?") +
+                            ": $" +
+                            t.usd_value +
+                            " (" +
+                            (pct * 100).toFixed(0) +
+                            "%)",
+                        x,
+                        bY + bH + 18,
+                    );
+                    x += bw;
+                });
+            }
+            function go(id, el) {
+                document.querySelectorAll(".pnl").forEach(function (p) {
+                    p.classList.remove("on");
+                });
+                $(id).classList.add("on");
+                document.querySelectorAll(".nl").forEach(function (n) {
+                    n.classList.remove("on");
+                });
+                if (el) el.classList.add("on");
+            }
+        </script>
+    </body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "agent_server": "http://127.0.0.1:9000",
+  "llm_provider": "anthropic",
+  "llm_api_key": "your-anthropic-key",
+  "llm_model": "",
+  "batch_size": 10,
+  "batch_timeout_s": 30,
+  "token_pairs": [
+    [
+      "XsDoVfqeBukxuZHWhdvWHBhgEHjGNst4MLodqsJHzoB",
+      "BjcRmwm8e25RgjkyaFE56fc7bxRgGPw96JUkXRJFEroT"
+    ]
+  ]
+}

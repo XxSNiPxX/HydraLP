@@ -1,0 +1,26 @@
+[package]
+name = "clmm_intelligence_server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = { version = "0.7", features = ["ws"] }
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4"] }
+tower-http = { version = "0.5", features = ["cors"] }
+futures = "0.3"
+rand = "0.10.0"
+chrono = "0.4.44"
+solana-program = "4.0.0"
+solana-sdk = "4.0.1"
+tracing = "0.1.44"
+reqwest = { version = "0.11", features = ["json", "rustls-tls"] }
+base64 = "0.22.1"
+anyhow = "1.0.102"
+dashmap = "6.1.0"
+tokio-tungstenite = "0.28.0"
+bs58 = "0.5.1"
+ed25519-dalek = "2.2.0"
+bincode = "1.3"
