@@ -123,6 +123,7 @@ It outputs:
     "reusing tokens, no swap required"
   ]
 }
+```
 
 🛡️ Safety Model
 
