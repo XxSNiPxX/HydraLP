@@ -8,7 +8,9 @@
 
 ## 🔁 Capital Lifecycle
 
+```
 USD₮ → Deploy → Earn Yield → Rebalance → Return to USD₮
+```
 
 HydraLP continuously cycles capital through this loop autonomously.
 
@@ -23,9 +25,9 @@ HydraLP is a three-layer autonomous system:
 - **Executor (Backend)** — builds and executes on-chain transactions
 
 **Key property:**
-- The AI plans but never acts  
-- The optimizer constrains but never decides  
-- The executor acts but never thinks  
+- The AI plans but never acts
+- The optimizer constrains but never decides
+- The executor acts but never thinks
 
 No single layer can cause catastrophic loss.
 
@@ -34,16 +36,16 @@ No single layer can cause catastrophic loss.
 ## 🔒 Proprietary Backend
 
 HydraLP uses a production-grade backend for:
-- real-time pool intelligence  
-- capital flow optimization  
-- transaction construction  
+- real-time pool intelligence
+- capital flow optimization
+- transaction construction
 
 This repository includes:
 - full autonomous agent (decision-making, WDK wallet, execution)
 - interface layer to backend
 - architecture and execution pipeline
 
-The backend itself is not fully included due to its proprietary nature.  
+The backend itself is not fully included due to its proprietary nature.
 Its structure and interaction model are documented in `/proprietary`.
 
 This reflects the real system design:
@@ -57,18 +59,18 @@ This reflects the real system design:
 
 HydraLP autonomously manages liquidity positions on Solana (Raydium CLMM).
 
-- An LLM analyzes wallet + market state  
-- Generates a structured plan  
-- Backend validates + optimizes it  
-- Client signs and executes transactions via WDK  
+- An LLM analyzes wallet + market state
+- Generates a structured plan
+- Backend validates + optimizes it
+- Client signs and executes transactions via WDK
 
 All capital allocation decisions are evaluated in **USD₮ terms**.
 
 The agent:
-- deploys USD₮ into USD₮-paired pools  
-- captures yield  
-- rebalances when positions drift  
-- returns capital back to USD₮  
+- deploys USD₮ into USD₮-paired pools
+- captures yield
+- rebalances when positions drift
+- returns capital back to USD₮
 
 No manual intervention required.
 
@@ -76,26 +78,37 @@ No manual intervention required.
 
 ## 🧩 Architecture
 
-![Architecture Diagram](your-image-here)
+```
+PROPRIETARY BACKEND (Rust, shared infrastructure)
+├── Poolwatcher         — live tick data, LP discovery, Jupiter prices
+├── Capital optimizer   — token flow analysis, doom-swap prevention
+├── Position executor   — CLMM math, Raydium TX construction, Jupiter swaps
+└── Gateway             — wallet-ownership auth, per-agent data filtering
 
-### Flow
-→ Executor (transaction construction)
-→ Client (WDK signing)
-→ On-chain execution
+    ↕ WebSocket + REST (any client can subscribe)
 
+CLIENT AGENT (Node.js, user-deployed)
+├── WDK wallet          — keys on user's machine, signs all TXs
+├── SKILL.md rules      — strategy prompt (swappable)
+├── Plan validator       — schema checks, capital flow safety
+├── LLM connection      — Claude (or any provider)
+└── Dashboard UI        — portfolio, positions, brain, execution
+```
+
+Each client is fully sovereign — different wallets, strategies, and LLM providers. They share the intelligence backend but never share keys, decisions, or capital.
 
 ---
 
 ## 📁 Repository Structure
 
+```
+/agents-server      → autonomous agent (LLM, WDK wallet, execution)
+/autobots-gateway   → authentication + routing layer
+/autobots-server    → optimization + execution backend
+/SKILL.md           → strategy definition (LLM behavior)
+```
 
-/agents-server → autonomous agent (LLM, WDK wallet, execution)
-/autobots-gateway → authentication + routing layer
-/autobots-server → optimization + execution backend
-/SKILL.md → strategy definition (LLM behavior)  
-
-
-> Note: `autobots-server` represents the core execution logic.  
+> Note: `autobots-server` represents the core execution logic.
 > Full production backend is partially abstracted.
 
 ---
@@ -103,13 +116,13 @@ No manual intervention required.
 ## 🧠 Agent Intelligence
 
 The agent receives:
-- wallet balances  
-- pool state  
-- token prices  
-- existing positions  
+- wallet balances
+- pool state
+- token prices
+- existing positions
 
 It outputs:
-- structured execution plans  
+- structured execution plans
 - explicit reasoning (logged + visible)
 
 ### Example Output
@@ -125,46 +138,67 @@ It outputs:
 }
 ```
 
-🛡️ Safety Model
+---
+
+## 🛡️ Safety Model
 
 Safety is enforced across layers:
 
-LLM → constrained by SKILL rules
+```
+LLM          → constrained by SKILL rules
 Orchestrator → validates + reorders steps
-Optimizer → prevents doom-swaps
-Executor → enforces feasibility
-WDK → guarantees self-custody
+Optimizer    → prevents doom-swaps
+Executor     → enforces feasibility
+WDK          → guarantees self-custody
+```
 
-Worst case:
+Worst case: the agent does nothing, not loses funds.
 
-the agent does nothing, not loses funds
+---
 
-🔑 WDK Integration
+## 🔑 WDK Integration
 
 WDK is the only key management layer.
 
-wallet creation (seed phrase)
-account derivation
-transaction signing
-authentication via signed memo TX
+- **Wallet creation** — seed phrase via `getRandomSeedPhrase()`
+- **Account derivation** — Solana keypair from WDK seed
+- **Transaction signing** — all on-chain actions signed by WDK keypair
+- **Authentication** — wallet proves ownership via signed Memo TX with server nonce
 
-Keys never leave the client runtime.
+Keys never leave the client runtime. The LLM never sees key material. The backend never accesses private keys. Self-custody is enforced by architecture, not policy.
 
-🚀 Demo
-Dashboard: http://localhost:8002
-Real-time:
-portfolio
-positions
-LLM reasoning
-execution steps
-transaction logs
-⚡ What Makes This Different
-USD₮-first capital model — stablecoin-denominated strategies
-True autonomy — agent decides when and why, not just how
-Global capital optimization — multi-step token flow reasoning
-Separated intelligence — AI cannot directly execute
-Self-custodial by architecture — not by promise
-🧪 Running (Simplified)
+---
+
+## 🚀 Demo
+
+**Live dashboard:** [coreengine.site](https://www.coreengine.site/)
+
+Real-time views:
+- **Portfolio** — balances, prices, USD values
+- **Positions** — tick ranges vs current price
+- **Brain** — LLM reasoning as it happens
+- **Execution** — step-by-step plan progress
+- **Transactions** — Solscan-linked TX history
+- **Diagnostics** — RPC latency, wallet status, connectivity
+
+The agent runs autonomously. The UI is observational only.
+
+---
+
+## ⚡ What Makes This Different
+
+- **USD₮-first capital model** — stablecoin-denominated strategies
+- **True autonomy** — agent decides *when and why*, not just how
+- **Global capital optimization** — multi-step token flow reasoning
+- **Separated intelligence** — AI cannot directly execute
+- **Self-custodial by architecture** — not by promise
+- **Works on small wallets ($10–50)** — optimized for low capital
+
+---
+
+## 🧪 Running
+
+```bash
 # backend
 cd autobots-server && cargo run
 
@@ -175,62 +209,28 @@ cd autobots-gateway && cargo run
 cd agents-server
 npm install
 node server.js
+```
 
-Fund wallet → agent runs autonomously.
+Fund the WDK wallet → agent runs autonomously.
 
-⚠️ Scope
+---
 
-This repository showcases the core architecture and execution logic.
+## 📊 Status
 
-Full system includes:
+- ✅ Autonomous execution loop implemented
+- ✅ Real on-chain transactions (Solana mainnet)
+- ✅ Live dashboard + reasoning trace
+- ✅ USD₮-denominated capital allocation
+- ✅ Designed for small capital ($10–50)
 
-production backend infra
-orchestration layers
-monitoring
-📊 Status
-Autonomous execution loop implemented
-Real on-chain interaction
-Live dashboard + reasoning trace
-Designed for small capital ($10–50)
-🧠 Core Insight
+---
 
-HydraLP is not a bot.
+## 🧠 Core Insight
 
-It is a continuous autonomous capital allocation system.
+HydraLP is not a bot. It is a continuous autonomous capital allocation system.
 
-License
+---
+
+## License
 
 Apache 2.0
-
-
----
-
-# What changed (important)
-
-### 1. Front-loaded clarity
-- immediately defines **what it is**
-- no scrolling needed
-
-### 2. Strong framing
-- “capital allocator” > “liquidity agent”
-
-### 3. Proprietary handled correctly
-- now looks **intentional**, not missing
-
-### 4. Faster mental model
-- lifecycle + flow visible instantly
-
----
-
-# Result
-
-Before:
-> “complex system, needs reading”
-
-After:
-> **“autonomous USD₮ capital system” (instant understanding)**
-
----
-
-If you want next step:
-I can align this README + your DoraHacks page so they reinforce each other (that’s what top submissions do).
